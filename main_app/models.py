@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here
 class Project(models.Model):
@@ -6,6 +7,7 @@ class Project(models.Model):
     description = models.TextField(blank=True, null=True)
     start_date=models.DateField()
     end_date=models.DateField(blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     STATUS_CHO=[
         ('In_progress', 'In Progress'),
@@ -39,6 +41,7 @@ class Task(models.Model):
 
 
 class Tasklog(models.Model):
+    
     task=models.ForeignKey(Task, on_delete=models.CASCADE, related_name="logs")
     msg=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True) # log time

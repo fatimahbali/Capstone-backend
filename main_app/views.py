@@ -3,13 +3,69 @@ from django.shortcuts import render
 # Create your views here.
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import generics, status
+from rest_framework import generics, status,permissions
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 
-from .models import Project,  Task
-from .serializers import ProjectSerializer, TaskSerializer, TaskLogSerializer
-
+from .models import Project,  Task, Tasklog
+from .serializers import ProjectSerializer, TaskSerializer, TaskLogSerializer, UserSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 # Define the home view
+
+# User Registration
+class LoginView(APIView):
+
+  def post(self, request):
+    try:
+      username = request.data.get('username')
+      password = request.data.get('password')
+      user = authenticate(username=username, password=password)
+      if user:
+        refresh = RefreshToken.for_user(user)
+        content = {'refresh': str(refresh), 'access': str(refresh.access_token),'user': UserSerializer(user).data}
+        return Response(content, status=status.HTTP_200_OK)
+      return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    except Exception as err:
+      return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# User Verification
+class VerifyUserView(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+
+  def get(self, request):
+    try:
+      user = User.objects.get(username=request.user.username)
+      try:
+        refresh = RefreshToken.for_user(user)
+        return Response({'refresh': str(refresh),'access': str(refresh.access_token),'user': UserSerializer(user).data}, status=status.HTTP_200_OK)
+      except Exception as token_error:
+        return Response({"detail": "Failed to generate token.", "error": str(token_error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as err:
+      return Response({"detail": "Unexpected error occurred.", "error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class CreateUserView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.save()
+            refresh = RefreshToken.for_user(user)
+            data = {
+        	    'refresh': str(refresh),
+        	    'access': str(refresh.access_token),
+        	    'user': UserSerializer(user).data
+            }
+            return Response(data, status=status.HTTP_201_CREATED)
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
 class Home(APIView):
   def get(self, request):
     content = {'message': 'Welcome to capstone project api home route!'}
@@ -21,27 +77,30 @@ class Projects(APIView):
     return Response(content)
   
 class ProjectIndex(APIView):
+  permission_classes = [permissions.IsAuthenticated]
   serializer_class = ProjectSerializer
   # post
   def get(self, request):
     try:
-      queryset = Project.objects.all()
-      serializer = self.serializer_class(queryset, many=True)
+      queryset = Project.objects.filter(user=request.user)
+      serializer = ProjectSerializer(queryset, many=True)
       return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as err:
       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
   def post(self, request, *args, **kwargs):
     try:
-      serializer = ProjectSerializer(data=request.data)
+      serializer = ProjectSerializer(data=request.data,  context={'request': request})
       if serializer.is_valid():
-        serializer.save()
+        serializer.save(user_id=request.user.id)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     except Exception as err:
       return Response({'error': str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ProjectDetail(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+
   serializer_class = ProjectSerializer
   lookup_field = 'id'
 
@@ -77,6 +136,8 @@ class ProjectDetail(APIView):
 
 
 class ProjectCreate(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+
   queryset = Project.objects.all()
   serializer_class = ProjectSerializer
   
@@ -92,6 +153,8 @@ class ProjectCreate(APIView):
     
 
 class TasksIndex(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+
   serializer_class = TaskSerializer
 
   def get(self, request, project_id):
@@ -130,6 +193,8 @@ class TasksIndex(APIView):
   
 
 class TaskDetail(APIView):
+  permission_classes = [permissions.IsAuthenticated]
+
 
   def get_object(self, project_id, task_id):
     return get_object_or_404(Task, id=task_id, project_id=project_id)
@@ -140,7 +205,9 @@ class TaskDetail(APIView):
         print(request.data)
         task = Task.objects.get(id=task_id, project_id=project_id)
         serializer = TaskSerializer(task, data=request.data)
+        
         if serializer.is_valid():
+            Tasklog.objects.create(task=task, msg=f"Modified {task.name}, Description: {task.description}, State:{task.status}",)
             serializer.save()
             print(serializer.data)
             return Response(serializer.data)
@@ -154,19 +221,37 @@ class TaskDetail(APIView):
     try:
        
         task = Task.objects.get(id=task_id, project_id=project_id, )
+        task_id = task.id
+        print("--------> ", task_id)
         task.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"tId": task_id}, status=status.HTTP_200_OK)
     except Task.DoesNotExist:
         return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class TaskLogCreate(APIView):
-   
-   def post(self, request, project_id, task_id):
-      task= get_object_or_404(Task, id=task_id, project_id=project_id)
-      serializer = TaskLogSerializer(data={**request.data, "task": task.id})
-      
-      if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
+  permission_classes = [permissions.IsAuthenticated]
 
-      return Response(serializer.errors, status=400)
+  serializer_class=TaskSerializer
+  
+  def get(self, request, project_id, task_id):
+        logs = Tasklog.objects.filter(task_id=task_id, task__project_id=project_id)
+        serializer = TaskLogSerializer(logs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+  def post(self, request, project_id, task_id):
+        
+      task = get_object_or_404(Task, id=task_id, project_id=project_id)
+      
+      data = request.data.copy()
+      data = {
+      'task': task.id,               
+      'msg': request.data.get('msg', '')  
+  }
+      serializer = TaskLogSerializer(data=data)
+      if serializer.is_valid():
+          serializer.save()
+          return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
+  
