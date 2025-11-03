@@ -168,29 +168,36 @@ class TasksIndex(APIView):
 
 
   def post(self, request, project_id):
-        project = get_object_or_404(Project, id=project_id)
-        data = request.data.copy()
-        data["project"] = project.id
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            tasks = Task.objects.filter(project_id=project_id)
-            
-            # tasks.save()
-            return Response(
-                self.serializer_class(tasks, many=True).data,
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+           
+            project = get_object_or_404(Project, id=project_id)
+            data = request.data.copy()
+            data["project"] = project.id
+            serializer = self.serializer_class(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                tasks = Task.objects.filter(project_id=project_id)
+                
+                # tasks.save()
+                return Response(
+                    self.serializer_class(tasks, many=True).data,
+                    status=status.HTTP_201_CREATED,
+                )
+        except Exception as err:
+            return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
   def delete(self, request, project_id):
+      try:
         task_id = request.data.get("task_id")
         task = get_object_or_404(Task, id=task_id, project_id=project_id)
         task.delete()
         tasks = Task.objects.filter(project_id=project_id)
         serializer = self.serializer_class(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-  
+      
+      except Exception as err:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class TaskDetail(APIView):
   permission_classes = [permissions.IsAuthenticated]
@@ -225,8 +232,8 @@ class TaskDetail(APIView):
         print("--------> ", task_id)
         task.delete()
         return Response({"tId": task_id}, status=status.HTTP_200_OK)
-    except Task.DoesNotExist:
-        return Response({"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as err:
+      return Response({' Cannot delete the task because of the error:': str(err)}, status=status.HTTP_404_NOT_FOUND)
 
 class TaskLogCreate(APIView):
   permission_classes = [permissions.IsAuthenticated]
@@ -234,12 +241,17 @@ class TaskLogCreate(APIView):
   serializer_class=TaskSerializer
   
   def get(self, request, project_id, task_id):
+      try:
         logs = Tasklog.objects.filter(task_id=task_id, task__project_id=project_id)
         serializer = TaskLogSerializer(logs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+      
+      except Exception as err:
+          return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
   def post(self, request, project_id, task_id):
-        
+    try:
+
       task = get_object_or_404(Task, id=task_id, project_id=project_id)
       
       data = request.data.copy()
@@ -251,7 +263,8 @@ class TaskLogCreate(APIView):
       if serializer.is_valid():
           serializer.save()
           return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except Exception as err:
+          return Response({'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
   
   

@@ -15,6 +15,7 @@ class Project(models.Model):
         ('On_hold', 'On Hold'),
     ]
     
+    
     status= models.CharField(max_length=30, choices=STATUS_CHO, default='in_progress')
 
     def __str__(self):
