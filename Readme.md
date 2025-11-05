@@ -148,7 +148,8 @@
   <li>🔔 Real-time notifications for updates and new tasks</li>
   <li>📱 Mobile-friendly interface and potential mobile app</li>
   <li>🔍 Advanced filtering and search (by status, due date, assignee)</li>
-  <li>🎯 Task priority and tagging system</li>
+ <li>👥 Add an Employee model for staff management</li>
+<li>👥 Expand user role system to include Admin and Employee accounts</li>
 </ul>
 
 
