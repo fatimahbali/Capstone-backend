@@ -241,6 +241,7 @@ class TaskLogCreate(APIView):
   serializer_class=TaskSerializer
   
   def get(self, request, project_id, task_id):
+      
       try:
         logs = Tasklog.objects.filter(task_id=task_id, task__project_id=project_id)
         serializer = TaskLogSerializer(logs, many=True)

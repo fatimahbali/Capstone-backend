@@ -35,7 +35,7 @@ class Task(models.Model):
     start_date=models.DateField()
     end_date=models.DateField(blank=True, null=True)
     project=models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
-    # assigned_to =models.ForeignKey()
+    
 
     def __str__(self):
         return self.name
@@ -45,7 +45,7 @@ class Tasklog(models.Model):
     
     task=models.ForeignKey(Task, on_delete=models.CASCADE, related_name="logs")
     msg=models.TextField()
-    created_at=models.DateTimeField(auto_now_add=True) # log time
+    created_at=models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"Log for {self.task.name}"
 

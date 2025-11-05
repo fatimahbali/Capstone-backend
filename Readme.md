@@ -5,25 +5,69 @@
 
 <h3>🧩 Main Features</h3>
 <ul>
-  <li>✅ User authentication and registration (JWT-based)</li>
+  <li>User authentication and registration (JWT-based)</li>
 
-  <li>✅ Full CRUD for Projects, Tasks.</li>
-  <li>✅ Task assignment and tracking</li>
-  <li>✅ Associate tasks to projects and logs to tasks</li>
-  <li>✅ API endpoints ready for integration with frontend SPA</li>
+  <li>Full CRUD for Projects, Tasks.</li>
+  <li>Task assignment and tracking</li>
+  <li>Associate tasks to projects and logs to tasks</li>
+  <li>API endpoints ready for integration with frontend SPA</li>
 </ul>
 
 <h2>⚙️ Installation / Setup</h2>
 <ol>
-  <li>Clone the repository: <code>git clone https://github.com/fatimahbali/Capstone-backend.git</code></li>
-  <li>Create a virtual environment: <code>python -m venv venv</code></li>
+<li>Enter the Right Folder: <code>cd Capstone-backend</code></li>
+  <li>Clone the repository: <code>git clone<a> https://github.com/fatimahbali/Capstone-backend.git</a></code></li>
+  <li>Create a virtual environment: <code>pipenv shell </code></li>
   <li>Activate the environment: <code>source venv/bin/activate</code> (Linux/macOS) or <code>venv\Scripts\activate</code> (Windows)</li>
+  <li>Activate the environment: <code>source venv/bin/activate</code> (Linux/macOS) or <code>venv\Scripts\activate</code> (Windows)</li>
+  <li>  Open the psql terminal by running : <code>psql</code></li>
+  <li> Create Database : <code>CREATE DATABASE project_name;</code></li>
   <li>Install dependencies: <code>pip install -r requirements.txt</code></li>
   <li>Run Migrations: 
-  <code>python manage.py makemigrations</code>
-  <code>python manage.py migrate</code></li>
-  <li>Start server: <code>python manage.py runserver</code></li>
+  <code>python3 manage.py makemigrations</code>
+  <code>python3 manage.py migrate</code></li>
+  <li>Start server: <code>python3 manage.py runserver</code></li>
 </ol>
+
+<h2>🔹 Backend Setup</h2>
+
+<h3>💡 Core Technologies</h3>
+<ul>
+  <li><b>Framework:</b> Django (Python)</li>
+  <li><b>Language:</b> Python 3.10+</li>
+  <li><b>Database:</b> PostgreSQL</li>
+  <li><b>Scripting:</b> JavaScript (for utilities or frontend integration)</li>
+</ul>
+
+<h2>🔹 Tech Stack</h2>
+
+<h3>💡 Core Technologies</h3>
+<ul>
+  <li><b>Framework:</b> Django</li>
+  <li><b>Language:</b> Python 3.10+</li>
+  <li><b>Database:</b> PostgreSQL</li>
+  <li><b>Scripting:</b> JavaScript (for frontend or utility scripts)</li>
+</ul>
+
+<h3>🧑‍💻 Development Tools</h3>
+<ul>
+  <li>Virtual Environment: venv (for dependency isolation)</li>
+  <li>Package Manager: pip (Python)</li>
+  <li>JavaScript Tools: npm / Node.js</li>
+  <li>Database Tools: psql (PostgreSQL CLI)</li>
+</ul>
+
+<h3>🏗️ Architecture</h3>
+<ul>
+  <li>📁 Project Structure: Apps organized by feature (users, projects, tasks)</li>
+  <li>🌐 API Layer: Django REST Framework (if used) or centralized views</li>
+  <li>🧭 Routing: URLs handled via Django <code>urls.py</code></li>
+  <li>🪝 State Management: Handled server-side with Django models and forms, or client-side with JS</li>
+</ul>
+
+
+
+
 <h2>⚙️ Backend Routes - Server (Django REST API)</h2>
 
 <h2>👥Users</h2>
@@ -152,6 +196,15 @@
 <img src="lastupdated2.png" alt="ERD Diagram" width="300">
 
 <br><br>
+<b>Frontend Link:</b>
+<pre><code>git clone https://github.com/fatimahbali/Capstone-frontend.git
+cd Capstone-frontend
+</code>
 
-<b>Backend Link:</b>  
-<a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a>
+<a href="http://localhost:5173">Link to frontend: http://localhost:5173/</a></pre>
+<b>Backend Link:</b> 
+
+<pre><code>git clone https://github.com/fatimahbali/Capstone-backend.git
+cd Capstone-backend</code> 
+
+<a href="http://127.0.0.1:8000/">Link to Backend : http://127.0.0.1:8000/</a>
