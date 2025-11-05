@@ -43,12 +43,7 @@
   <tr>
     <td>POST</td><td>/users/logout/</td><td>delete</td><td>Logout user</td>
   </tr>
-  <tr>
-    <td>PUT</td><td>/users/:id/</td><td>update</td><td>Update user information</td>
-  </tr>
-  <tr>
-    <td>DELETE</td><td>/users/:id/</td><td>destroy</td><td>Delete user</td>
-  </tr>
+
 </table>
 
 
